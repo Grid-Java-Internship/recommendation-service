@@ -1,0 +1,13 @@
+spring:
+  profiles:
+    active: "default"
+  application:
+    name: "${SPRING_APP_NAME:reservation-service}"
+logging:
+  pattern:
+    console: "${LOG_PATTERN_CONSOLE:%green(%d{HH:mm:ss.SSS}) %blue(%-5level) %red([%thread]) %yellow(%logger{15}) - %msg%n}"
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
