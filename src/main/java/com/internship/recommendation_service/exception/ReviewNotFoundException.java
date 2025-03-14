@@ -7,7 +7,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @RequiredArgsConstructor
-public class ReservationsNotFoundException extends RuntimeException{
+public class ReviewNotFoundException extends RuntimeException{
     private final String message;
-    public static final String MESSAGE = "There are no reservations";
+    public static final String REVIEWS_NOT_FOUND = "Reviews not found.";
 }

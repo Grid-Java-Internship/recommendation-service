@@ -1,6 +1,6 @@
 package com.internship.recommendation_service.dto;
 
-import com.internship.recommendation_service.dto.status.ReservationStatus;
+import com.internship.recommendation_service.dto.enums.ReservationStatus;
 import lombok.*;
 
 import java.time.LocalDateTime;

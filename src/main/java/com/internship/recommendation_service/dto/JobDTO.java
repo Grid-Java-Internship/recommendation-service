@@ -1,7 +1,9 @@
 package com.internship.recommendation_service.dto;
 
 
-import com.internship.recommendation_service.dto.status.Category;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.internship.recommendation_service.dto.enums.Category;
+import com.internship.recommendation_service.dto.enums.Status;
 import lombok.*;
 
 import java.io.Serializable;
@@ -20,4 +22,6 @@ public class JobDTO implements Serializable {
     private String description;
 
     private Category category;
+
+    private Status status;
 }

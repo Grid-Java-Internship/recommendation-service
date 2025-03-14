@@ -2,12 +2,13 @@ package com.internship.recommendation_service.service;
 
 import com.internship.recommendation_service.dto.JobDTO;
 import com.internship.recommendation_service.dto.ReservationDTO;
-import com.internship.recommendation_service.dto.status.Category;
-import com.internship.recommendation_service.dto.status.ReservationStatus;
+import com.internship.recommendation_service.dto.enums.Category;
+import com.internship.recommendation_service.dto.enums.ReservationStatus;
 import com.internship.recommendation_service.exception.JobNotFoundException;
-import com.internship.recommendation_service.exception.ReservationsNotFoundException;
+import com.internship.recommendation_service.exception.ReservationNotFoundException;
 import com.internship.recommendation_service.openfeign.clients.JobClient;
 import com.internship.recommendation_service.openfeign.clients.ReservationClient;
+import com.internship.recommendation_service.openfeign.clients.ReviewClient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,16 +33,19 @@ class RecommendationServiceImplTest {
     @Mock
     private JobClient jobClient;
 
+    @Mock
+    private ReviewClient reviewClient;
+
     private List<ReservationDTO> reservations;
     private JobDTO job;
 
 
-    private ReservationDTO createApprovedReservation(Long id, Long jobId, Long workerId) {
+    private ReservationDTO createReservation(Long id, Long jobId, Long workerId, ReservationStatus status) {
         return  ReservationDTO.builder()
                 .id(id)
                 .jobId(jobId)
                 .workerId(workerId)
-                .status(ReservationStatus.APPROVED)
+                .status(status)
                 .build();
     }
 
@@ -50,16 +54,25 @@ class RecommendationServiceImplTest {
 
         reservations = new ArrayList<>();
 
-        reservations.add(createApprovedReservation(1L, 1L, 1L));
+        reservations.add(createReservation(1L, 1L,
+                1L, ReservationStatus.APPROVED));
 
-        reservations.add(createApprovedReservation(2L, 2L, 2L));
+        reservations.add(createReservation(2L, 2L,
+                2L, ReservationStatus.APPROVED));
 
-        reservations.add(createApprovedReservation(3L, 2L, 2L));
+        reservations.add(createReservation(3L, 2L,
+                2L, ReservationStatus.APPROVED));
+
+        reservations.add(createReservation(4L, 1L,
+                1L, ReservationStatus.PENDING_WORKER_APPROVAL));
+
+        reservations.add(createReservation(5L, 1L,
+                1L, ReservationStatus.PENDING_WORKER_APPROVAL));
 
         job = JobDTO.builder()
                 .id(2L)
-                .title("Electrician needed for home repairs.")
-                .description("We are looking for electrician.")
+                .title("Skilled electrician.")
+                .description("Electrician for home repairs.")
                 .category(Category.PLUMBER)
                 .build();
     }
@@ -73,8 +86,8 @@ class RecommendationServiceImplTest {
 
         assertNotNull(jobDTO);
         assertEquals(2L, jobDTO.getId());
-        assertEquals("Electrician needed for home repairs.", jobDTO.getTitle());
-        assertEquals("We are looking for electrician.", jobDTO.getDescription());
+        assertEquals("Skilled electrician.", jobDTO.getTitle());
+        assertEquals("Electrician for home repairs.", jobDTO.getDescription());
         assertEquals(Category.PLUMBER, jobDTO.getCategory());
 
         verify(reservationClient, times(1)).getReservations();
@@ -88,9 +101,21 @@ class RecommendationServiceImplTest {
         reservations.clear();
         when(reservationClient.getReservations()).thenReturn(reservations);
 
-        ReservationsNotFoundException exception = assertThrows(ReservationsNotFoundException.class,
+        ReservationNotFoundException exception = assertThrows(ReservationNotFoundException.class,
                 () -> recommendationService.getJobRecommendation());
-        assertEquals(ReservationsNotFoundException.MESSAGE, exception.getMessage());
+        assertEquals(ReservationNotFoundException.RESERVATIONS_NOT_FOUND, exception.getMessage());
+
+        verify(reservationClient,times(1)).getReservations();
+        verify(jobClient,never()).getJobById(anyLong());
+    }
+
+    @Test
+    void getJobRecommendationReservationsNull() {
+        when(reservationClient.getReservations()).thenReturn(null);
+
+        ReservationNotFoundException exception = assertThrows(ReservationNotFoundException.class,
+                () -> recommendationService.getJobRecommendation());
+        assertEquals(ReservationNotFoundException.RESERVATIONS_NOT_FOUND, exception.getMessage());
 
         verify(reservationClient,times(1)).getReservations();
         verify(jobClient,never()).getJobById(anyLong());
@@ -98,16 +123,17 @@ class RecommendationServiceImplTest {
 
     @Test
     void getJobRecommendationJobNotFoundException() {
-
         when(reservationClient.getReservations()).thenReturn(reservations);
         when(jobClient.getJobById(2L)).thenReturn(null);
 
         JobNotFoundException exception = assertThrows(JobNotFoundException.class,
                 () -> recommendationService.getJobRecommendation());
-        assertEquals(JobNotFoundException.MESSAGE, exception.getMessage());
+        assertEquals(JobNotFoundException.JOB_WITH_ID_NOT_FOUND, exception.getMessage());
 
         verify(reservationClient, times(1)).getReservations();
         verify(jobClient, times(1)).getJobById(2L);
         verify(jobClient, times(0)).getJobById(1L);
     }
+
+
 }

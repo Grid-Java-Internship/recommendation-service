@@ -7,8 +7,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @RequiredArgsConstructor
-public class JobNotFoundException extends RuntimeException{
+public class ReservationNotFoundException extends RuntimeException{
     private final String message;
-    public static final String JOB_WITH_ID_NOT_FOUND = "Job not found.";
-    public static final String JOBS_NOT_FOUND = "Jobs not found.";
+    public static final String RESERVATIONS_NOT_FOUND = "There are no reservations.";
 }

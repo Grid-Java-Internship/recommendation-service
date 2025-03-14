@@ -1,4 +1,4 @@
-package com.internship.recommendation_service.dto.status;
+package com.internship.recommendation_service.dto.enums;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
