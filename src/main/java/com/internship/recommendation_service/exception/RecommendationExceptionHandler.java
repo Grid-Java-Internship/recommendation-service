@@ -1,6 +1,7 @@
 package com.internship.recommendation_service.exception;
 
 import com.internship.recommendation_service.dto.ExceptionResponse;
+import feign.RetryableException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -55,6 +56,30 @@ public class RecommendationExceptionHandler {
     public ResponseEntity<ExceptionResponse> handleReviewNotFoundException(ReviewNotFoundException ex) {
         log.error("ReviewNotFoundException occurred: {}", ex.getMessage());
         return handleUserDefinedException(ex, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(RetryableException.class)
+    public ResponseEntity<ExceptionResponse> handleRetryableException(
+            RetryableException ex
+    ) {
+        log.error(ex.getMessage());
+
+        ExceptionResponse errorResponse = ExceptionResponse.builder()
+                .statusCode(HttpStatus.SERVICE_UNAVAILABLE.value())
+                .messages(List.of(ex.getMessage()))
+                .build();
+
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(errorResponse);
+    }
+
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<ExceptionResponse> handleNotFoundException(NotFoundException ex) {
+        String errorMessage = ex.getMessage();
+        ExceptionResponse errorResponse = ExceptionResponse.builder()
+                .statusCode(HttpStatus.NOT_FOUND.value())
+                .messages(List.of(errorMessage))
+                .build();
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
     }
 
 }
