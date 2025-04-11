@@ -1,0 +1,16 @@
+services:
+  recommendation-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8088:8088"
+    container_name: recommendation-service
+    networks:
+      - global-network
+
+networks:
+  global-network:
+    name: global-network
+    external: true
+    driver: bridge
