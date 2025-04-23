@@ -66,9 +66,9 @@ public class RecommendationServiceImpl implements RecommendationService {
      */
     private boolean isJobActive(@Valid JobDTO job) {
         boolean isActive = job != null && "ACCEPTED".equals(job.status());
-        LogUtil.info("Job {} is {} active (Status: {}).",
+        LogUtil.info("Job {} is {}active (Status: {}).",
                 job != null ? job.id() : "null",
-                isActive ? "" : "not",
+                isActive ? "" : "not ",
                 job != null ? job.status() : "N/A");
         return isActive;
     }

@@ -22,7 +22,7 @@ public class LogUtil {
      * @param message the message to be logged
      * @param args    the arguments to be used in the formatting
      */
-    public static void warn(String message, Object... args) {
+    public void warn(String message, Object... args) {
         log.warn(message, args);
     }
 

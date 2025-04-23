@@ -64,7 +64,7 @@ public class RecommendationEngine {
             || jobDetails == null
             || jobDetails.lat() == null
             || jobDetails.lon() == null) {
-            LogUtil.warn("User data for distance score. Returning 0.0.");
+            LogUtil.warn("User data for distance score is missing. Returning 0.0.");
             return 0.0;
         }
 
