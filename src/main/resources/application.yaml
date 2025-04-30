@@ -10,6 +10,10 @@ spring:
       database: 1
   cache:
     type: redis
+  output:
+    ansi:
+      enabled: always
+
 
 logging:
   pattern:
@@ -25,29 +29,59 @@ server:
   port: 8088
 
 # Base URLs for microservices
-microserviceUrls:
-  auth-service: http://localhost:8080
-  user-service: http://localhost:8081
-  job-service: http://job-service:8082
-  reservation-service: http://reservation-service:8083
-  review-service: http://review-service:8084
-  report-service: http://localhost:8085
-  chat-service: http://localhost:8086
-  notification-service: http://localhost:8087
-  recommendation-service: http://localhost:8088
-  payment-service: http://localhost:8089
+service:
+  urls:
+    auth-service: http://auth-service:8080
+    user-service: http://user-service:8081
+    job-service: http://job-service:8082
+    reservation-service: http://reservation-service:8083
+    review-service: http://review-service:8084
+    report-service: http://report-service:8085
+    chat-service: http://chat-service:8086
+    notification-service: http://notification-service:8087
+    recommendation-service: http://recommendation-service:8088
+    payment-service: http://payment-service:8089
 
-# Feign client configurations
-feign:
+# Web client configurations
+web:
   client:
+    user-service:
+      base-url-users: "/v1/users"
+      base-url-favorites: "/v1/favorites"
+      base-url-blocks: "/v1/blocks"
+      base-url-preferences: "/v1/preferences"
     job-service:
-      name: "job-service"
-      base-path: "/v1/jobs"
-    reservation-service:
-      name: "reservation-service"
-      base-path: "/v1/reservations"
+      base-url: "/v1/jobs"
     review-service:
-      name: "review-service"
-      base-path: "/v1/review"
-      api:
-        jobs: "/JOB"
+      base-url: "/v1/review"
+      api-user-rating: "/rating/USER"
+      api-job-rating: "/rating/JOB"
+    report-service:
+      base-url: "/v1/report"
+      api-user-report-info: "/info/USER"
+      api-job-report-info: "/info/JOB"
+    geolocation-service:
+      base-url: "https://nominatim.openstreetmap.org"
+      api-search: "/search"
+
+# Recommendation engine weights
+recommendation:
+  weights:
+    distance: 5.0                   # Points for being within preferred distance
+    experience-match: 8.0          # Points for matching preferred experience
+    category-match: 15.0            # Points for being in the list of wanted categories
+    favorite: 10.0                  # Points for being user's favorite
+    worker-rating: 15.0             # Multiplier for average rating is in range [0-5]
+    job-rating: 20.0                # Multiplier for category rating is in range [0-5]
+    hourly-rate: -0.1               # Penalty points per unit of currency
+    user-reports-low: -1.0          # Penalty per low severity report against user
+    user-reports-medium: -2.0       # Penalty per medium severity report against user
+    user-reports-high: -5.5         # Penalty per high severity report against user
+    job-reports-low: -2.0           # Penalty per low severity report against job
+    job-reports-medium: -5.0        # Penalty per medium severity report against job
+    job-reports-high: -7.5          # Penalty per high severity report against job
+  defaults:
+    limit: 15                       # Default number of recommendations
+    max-distance: 100.0             # Default maximum distance if preference not set
+    min-experience: 1               # Default minimum experience if preference not set
+

@@ -2,10 +2,9 @@ package com.internship.recommendation_service.exception;
 
 import com.internship.recommendation_service.constant.ExceptionMessages;
 import com.internship.recommendation_service.dto.response.ExceptionResponse;
-import feign.FeignException;
+import com.internship.recommendation_service.util.LogUtil;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,7 +15,6 @@ import org.springframework.web.context.request.WebRequest;
 
 import java.util.List;
 
-@Slf4j
 @RestControllerAdvice
 public class DefaultExceptionHandler {
     /**
@@ -36,7 +34,7 @@ public class DefaultExceptionHandler {
                 .map(DefaultMessageSourceResolvable::getDefaultMessage)
                 .toList();
 
-        log.error("Validation failed for request [{}]: {}",
+        LogUtil.error("Validation failed for request [{}]: {}",
                 request.getDescription(false), errorMessages);
 
         return generateExceptionResponse(HttpStatus.BAD_REQUEST, errorMessages.toArray(new String[0]));
@@ -59,25 +57,16 @@ public class DefaultExceptionHandler {
                 .map(ConstraintViolation::getMessage)
                 .toList();
 
-        log.error("Validation failed for request [{}]: {}",
+        LogUtil.error("Validation failed for request [{}]: {}",
                 request.getDescription(false), errorMessages);
 
-        return generateExceptionResponse(HttpStatus.BAD_REQUEST, errorMessages.toArray(new String[0]));
+        return generateExceptionResponse(HttpStatus.INTERNAL_SERVER_ERROR, ExceptionMessages.INTERNAL_SERVER_ERROR);
     }
 
-    /**
-     * Handles exceptions of type {@link FeignException} that occur during Feign client interactions.
-     *
-     * @param ex      the {@link FeignException} thrown
-     * @param request the current web request
-     * @return a {@link ResponseEntity} containing an {@link ExceptionResponse} with
-     * a status of {@code HttpStatus.SERVICE_UNAVAILABLE} and a message indicating
-     * that the service is temporarily unavailable
-     */
-    @ExceptionHandler(FeignException.class)
-    public ResponseEntity<ExceptionResponse> handleFeignException(
-            FeignException ex, WebRequest request) {
-        log.error("Feign exception occurred for request [{}]: {}",
+    @ExceptionHandler(ServiceUnavailableException.class)
+    public ResponseEntity<ExceptionResponse> handleServiceUnavailableException(
+            ServiceUnavailableException ex, WebRequest request) {
+        LogUtil.error("Service unavailable for request [{}]: {}",
                 request.getDescription(false), ex.getMessage());
 
         return generateExceptionResponse(HttpStatus.SERVICE_UNAVAILABLE, ExceptionMessages.SERVICE_UNAVAILABLE);
@@ -96,7 +85,7 @@ public class DefaultExceptionHandler {
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<ExceptionResponse> handleNotFoundException(
             NotFoundException ex, WebRequest request) {
-        log.error("Resource not found [{}] on request [{}]: {}",
+        LogUtil.error("Resource not found [{}] on request [{}]: {}",
                 ex.getClass().getSimpleName(), request.getDescription(false), ex.getMessage());
 
         return generateExceptionResponse(HttpStatus.NOT_FOUND, ExceptionMessages.RESOURCE_NOT_FOUND);
@@ -115,7 +104,7 @@ public class DefaultExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ExceptionResponse> handleException(
             Exception ex, WebRequest request) {
-        log.error("Unexpected internal server error occurred on request [{}]: ",
+        LogUtil.error("Unexpected internal server error occurred on request [{}]: ",
                 request.getDescription(false), ex);
 
         return generateExceptionResponse(HttpStatus.INTERNAL_SERVER_ERROR, ExceptionMessages.INTERNAL_SERVER_ERROR);
