@@ -32,12 +32,16 @@ security:
   feign:
     user-service:
       api-key: "${USER_API_KEY}"
+      enabled: true
     job-service:
       api-key: "${JOB_API_KEY}"
+      enabled: true
     review-service:
       api-key: "${REVIEW_API_KEY}"
+      enabled: true
     report-service:
       api-key: "${REPORT_API_KEY}"
+      enabled: true
   paths:
     permitted-requests-for-all-users:
       - method: GET
