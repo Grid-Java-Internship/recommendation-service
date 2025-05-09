@@ -22,11 +22,12 @@ public class ServiceClient {
      * @param <T>          the type of the response object
      * @return a Mono that emits the response object of type T
      */
-    public <T> Mono<T> getMonoObject(String url, Class<T> responseType) {
+    public <T> Mono<T> getMonoObject(String url, Class<T> responseType, String apiKey) {
         LogUtil.info("GET request to URL: {}", url);
 
         return webClient.get()
                 .uri(url)
+                .header("X-API-KEY", apiKey)
                 .retrieve()
                 .bodyToMono(responseType)
                 .doOnEach(signal -> {
@@ -45,11 +46,12 @@ public class ServiceClient {
      * @param <T>          the type of the response objects
      * @return a Flux that emits the response objects of type T
      */
-    public <T> Flux<T> getFluxList(String url, Class<T> responseType) {
+    public <T> Flux<T> getFluxList(String url, Class<T> responseType, String apiKey) {
         LogUtil.info("GET request to URL: {}", url);
 
         return webClient.get()
                 .uri(url)
+                .header("X-API-KEY", apiKey)
                 .retrieve()
                 .bodyToFlux(responseType)
                 .doOnEach(signal -> {
@@ -68,8 +70,8 @@ public class ServiceClient {
      * @param <T>          the type of the response objects
      * @return a Mono that emits the response objects of type T
      */
-    public <T> Mono<List<T>> getMonoList(String url, Class<T> responseType) {
-        return getFluxList(url, responseType)
+    public <T> Mono<List<T>> getMonoList(String url, Class<T> responseType, String apiKey) {
+        return getFluxList(url, responseType, apiKey)
                 .collectList()
                 .onErrorReturn(List.of());
     }

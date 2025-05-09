@@ -36,7 +36,7 @@ public class GeolocationServiceClient {
         LogUtil.info("Getting coordinates for query: {}", query);
 
         return serviceClient
-                .getMonoList(url, GeoCoordinatesDTO.class)
+                .getMonoList(url, GeoCoordinatesDTO.class, "")
                 .map(response -> {
                     if (response.isEmpty()) {
                         LogUtil.error("No coordinates found for query '{}'", query);

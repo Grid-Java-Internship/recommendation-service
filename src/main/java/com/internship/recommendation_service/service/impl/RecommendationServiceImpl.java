@@ -9,6 +9,7 @@ import com.internship.recommendation_service.util.LogUtil;
 import com.internship.recommendation_service.util.RecommendationEngine;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 import reactor.core.publisher.Flux;

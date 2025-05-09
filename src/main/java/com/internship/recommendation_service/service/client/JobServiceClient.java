@@ -5,6 +5,7 @@ import com.internship.recommendation_service.config.property.service.ServiceUrls
 import com.internship.recommendation_service.dto.external.JobDTO;
 import com.internship.recommendation_service.util.LogUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Flux;
@@ -15,6 +16,9 @@ public class JobServiceClient {
     private final ServiceClient serviceClient;
     private final ServiceUrlsConfig serviceUrlsConfig;
     private final JobServiceConfig jobServiceConfig;
+
+    @Value("${security.feign.job-service.api-key}")
+    private String jobApiKey;
 
     /**
      * Returns a Flux that emits a stream of JobDTO objects, representing all jobs
@@ -28,7 +32,7 @@ public class JobServiceClient {
         String url = buildUrlToFetchAllJobs(baseUrl);
 
         LogUtil.info("Getting all jobs");
-        return serviceClient.getFluxList(url, JobDTO.class);
+        return serviceClient.getFluxList(url, JobDTO.class, jobApiKey);
     }
 
     /**

@@ -14,7 +14,6 @@ spring:
     ansi:
       enabled: always
 
-
 logging:
   pattern:
     console: "${LOG_PATTERN_CONSOLE:%green(%d{HH:mm:ss.SSS}) %blue(%-5level) %red([%thread]) %yellow(%logger{15}) - %msg%n}"
@@ -27,6 +26,29 @@ management:
 
 server:
   port: 8088
+
+security:
+  api-key: "${BASE_API_KEY}"
+  feign:
+    user-service:
+      api-key: "${USER_API_KEY}"
+    job-service:
+      api-key: "${JOB_API_KEY}"
+    review-service:
+      api-key: "${REVIEW_API_KEY}"
+    report-service:
+      api-key: "${REPORT_API_KEY}"
+  paths:
+    permitted-requests-for-all-users:
+      - method: GET
+        pattern: "/actuator/**"
+      - method: GET
+        pattern: "/swagger-ui/**"
+      - method: GET
+        pattern: "/v3/api-docs/**"
+    permitted-requests-for-users-or-admin-or-super-admin:
+      - method: GET
+        pattern: "/v1/recommendations/jobs/**"
 
 # Base URLs for microservices
 service:
@@ -85,3 +107,11 @@ recommendation:
     max-distance: 100.0             # Default maximum distance if preference not set
     min-experience: 1               # Default minimum experience if preference not set
 
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: ${EUREKA_SERVICE_URL:http://eureka-naming-server:8761/eureka}

@@ -213,6 +213,7 @@ buildNumber.properties
 .gradle
 **/build/
 !src/**/build/
+gradle.properties
 
 # Ignore Gradle GUI config
 gradle-app.setting
@@ -236,5 +237,8 @@ gradle-app.setting
 
 ### Tests ###
 htmlReport
+
+### env
+.env
 
 # End of https://www.toptal.com/developers/gitignore/api/macos,java,intellij,gradle,maven,git
