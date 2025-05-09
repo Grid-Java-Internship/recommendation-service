@@ -6,6 +6,8 @@ services:
     ports:
       - "8088:8088"
     container_name: recommendation-service
+    env_file:
+      - .env
     networks:
       - global-network
 

@@ -5,6 +5,7 @@ import com.internship.recommendation_service.config.property.service.ServiceUrls
 import com.internship.recommendation_service.dto.external.ReportStatsDTO;
 import com.internship.recommendation_service.util.LogUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
@@ -14,6 +15,9 @@ public class ReportServiceClient {
     private final ServiceClient serviceClient;
     private final ServiceUrlsConfig serviceUrlsConfig;
     private final ReportServiceConfig reportServiceConfig;
+
+    @Value("${security.feign.report-service.api-key}")
+    private String reportApiKey;
 
     /**
      * Retrieves report information for a specific user by their ID.
@@ -28,7 +32,7 @@ public class ReportServiceClient {
                      "/" + userId;
 
         return serviceClient
-                .getMonoObject(url, ReportStatsDTO.class)
+                .getMonoObject(url, ReportStatsDTO.class, reportApiKey)
                 .onErrorResume(e -> {
                     LogUtil.error("Error retrieving report info for user {}", userId, e);
                     return Mono.just(ReportStatsDTO.defaultValue(userId, "USER"));
@@ -48,7 +52,7 @@ public class ReportServiceClient {
                      "/" + jobId;
 
         return serviceClient
-                .getMonoObject(url, ReportStatsDTO.class)
+                .getMonoObject(url, ReportStatsDTO.class, reportApiKey)
                 .onErrorResume(e -> {
                     LogUtil.error("Error retrieving report info for job {}", jobId, e);
                     return Mono.just(ReportStatsDTO.defaultValue(jobId, "JOB"));

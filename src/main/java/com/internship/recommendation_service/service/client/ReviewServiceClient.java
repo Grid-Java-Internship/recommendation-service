@@ -5,6 +5,7 @@ import com.internship.recommendation_service.config.property.service.ServiceUrls
 import com.internship.recommendation_service.dto.external.ReviewStatsDTO;
 import com.internship.recommendation_service.util.LogUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
@@ -14,6 +15,9 @@ public class ReviewServiceClient {
     private final ServiceClient serviceClient;
     private final ServiceUrlsConfig serviceUrlsConfig;
     private final ReviewServiceConfig reviewServiceConfig;
+
+    @Value("${security.feign.review-service.api-key}")
+    private String reviewApiKey;
 
     /**
      * Returns a Mono that emits a ReviewStatsDTO representing the rating of the user with the given ID.
@@ -29,7 +33,7 @@ public class ReviewServiceClient {
 
         LogUtil.info("Getting user rating for user {}", userId);
         return serviceClient
-                .getMonoObject(url, ReviewStatsDTO.class)
+                .getMonoObject(url, ReviewStatsDTO.class, reviewApiKey)
                 .onErrorResume(error -> {
                     LogUtil.error("Error retrieving rating for user {}", userId, error);
                     return Mono.just(ReviewStatsDTO.defaultValue(userId, "USER"));
@@ -50,7 +54,7 @@ public class ReviewServiceClient {
 
         LogUtil.info("Getting job rating for job {}", jobId);
         return serviceClient
-                .getMonoObject(url, ReviewStatsDTO.class)
+                .getMonoObject(url, ReviewStatsDTO.class, reviewApiKey)
                 .onErrorResume(error -> {
                     LogUtil.error("Error retrieving rating for job {}", jobId, error);
                     return Mono.just(ReviewStatsDTO.defaultValue(jobId, "JOB"));

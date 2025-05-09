@@ -7,6 +7,7 @@ import com.internship.recommendation_service.dto.external.UserDTO;
 import com.internship.recommendation_service.dto.external.UserPreferencesDTO;
 import com.internship.recommendation_service.util.LogUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 import reactor.core.publisher.Mono;
@@ -22,6 +23,9 @@ public class UserServiceClient {
     private final UserServiceConfig userServiceConfig;
     private final RecommendationDefaultsConfig defaults;
 
+    @Value("${security.feign.user-service.api-key}")
+    private String userApiKey;
+
     /**
      * Retrieves the details of a user given their user ID.
      *
@@ -35,7 +39,7 @@ public class UserServiceClient {
 
         LogUtil.info("Getting user details for user {}", userId);
 
-        return serviceClient.getMonoObject(url, UserDTO.class);
+        return serviceClient.getMonoObject(url, UserDTO.class, userApiKey);
     }
 
     /**
@@ -51,7 +55,7 @@ public class UserServiceClient {
 
         LogUtil.info("Getting user preferences for user {}", userId);
         return serviceClient
-                .getMonoObject(url, UserPreferencesDTO.class)
+                .getMonoObject(url, UserPreferencesDTO.class, userApiKey)
                 .onErrorResume(e -> {
                     LogUtil.warn("Failed to get user preferences for user {}: {}", userId, e.getMessage());
                     return Mono.just(UserPreferencesDTO.defaultValue(userId, defaults.getMaxDistance(), defaults.getMinExperience()));
@@ -70,7 +74,7 @@ public class UserServiceClient {
                      "?userId=" + userId;
 
         LogUtil.info("Getting favorite users for user {}", userId);
-        return serviceClient.getMonoList(url, Long.class);
+        return serviceClient.getMonoList(url, Long.class, userApiKey);
     }
 
     /**
@@ -85,6 +89,6 @@ public class UserServiceClient {
                      "/" + userId;
 
         LogUtil.info("Getting blocked users for user {}", userId);
-        return serviceClient.getMonoList(url, Long.class);
+        return serviceClient.getMonoList(url, Long.class, userApiKey);
     }
 }
