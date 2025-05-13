@@ -17,16 +17,14 @@ public class RecommendationController {
     /**
      * Endpoint to retrieve job recommendations for a specific user.
      *
-     * @param userId the ID of the user for whom to fetch job recommendations
      * @param limit  optional parameter to specify the maximum number of recommendations to return;
      *               defaults to a pre-configured limit if not provided or invalid
      * @return a Flux stream of job score responses containing job recommendations
      */
-    @GetMapping("/jobs/{userId}")
+    @GetMapping("/jobs")
     public Flux<JobScoreResponse> getJobRecommendations(
-            @PathVariable Long userId,
             @RequestParam(required = false) Integer limit) {
         int effectiveLimit = (limit != null && limit > 0) ? limit : defaults.getLimit();
-        return recommendationService.getJobRecommendations(userId, effectiveLimit);
+        return recommendationService.getJobRecommendations(effectiveLimit);
     }
 }

@@ -9,7 +9,7 @@ import com.internship.recommendation_service.util.LogUtil;
 import com.internship.recommendation_service.util.RecommendationEngine;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 import reactor.core.publisher.Flux;
@@ -32,7 +32,9 @@ public class RecommendationServiceImpl implements RecommendationService {
     private final RecommendationEngine recommendationEngine;
 
     @Override
-    public Flux<JobScoreResponse> getJobRecommendations(Long userId, int limit) {
+    public Flux<JobScoreResponse> getJobRecommendations(int limit) {
+        Long userId = Long.parseLong((String) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+
         LogUtil.info("Getting job recommendations for user {}", userId);
 
         // Fetch user-specific data concurrently
@@ -55,7 +57,8 @@ public class RecommendationServiceImpl implements RecommendationService {
                 .doOnComplete(() -> LogUtil.info("Finished generating recommendations for user {}", userId))
                 .doOnError(e -> LogUtil.error("Error generating recommendations for user {}: {}",
                         userId,
-                        e.getMessage()));
+                        e != null && e.getMessage() != null ? e.getMessage() : "Unknown error")
+                );
     }
 
     /**
