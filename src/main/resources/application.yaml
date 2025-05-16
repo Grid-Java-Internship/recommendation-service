@@ -52,7 +52,7 @@ security:
         pattern: "/v3/api-docs/**"
     permitted-requests-for-users-or-admin-or-super-admin:
       - method: GET
-        pattern: "/v1/recommendations/jobs/**"
+        pattern: "/v1/recommendations/jobs"
 
 # Base URLs for microservices
 service:

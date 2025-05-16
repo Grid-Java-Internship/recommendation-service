@@ -2,6 +2,7 @@ package com.internship.recommendation_service.config;
 
 import com.internship.authentication_library.config.SecurityConfiguration;
 import com.internship.recommendation_service.constant.PathPermissionConstants;
+import jakarta.servlet.DispatcherType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,7 +23,10 @@ public class SecurityConfig {
             HttpSecurity httpSecurity
 
     ) throws Exception {
-        return securityConfiguration.securityFilterChain(httpSecurity,
+        HttpSecurity http = httpSecurity
+                .authorizeHttpRequests(authorize -> authorize
+                        .dispatcherTypeMatchers(DispatcherType.ASYNC).permitAll());
+        return securityConfiguration.securityFilterChain(http,
                 pathPermissionConstants.getPermittedRequestsForAllUsers(),
                 pathPermissionConstants.getPermittedRequestForSuperAdmin(),
                 pathPermissionConstants.getPermittedRequestsForAdminOrSuperAdmin(),

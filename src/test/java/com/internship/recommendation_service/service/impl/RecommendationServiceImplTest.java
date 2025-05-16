@@ -16,6 +16,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.time.LocalDate;
 import java.util.Collections;
@@ -57,6 +60,9 @@ class RecommendationServiceImplTest {
     private JobScoreResponse score1, score2, score3;
     private ReviewStatsDTO worker2Reviews;
     private ReviewStatsDTO worker3Reviews;
+
+    private Authentication authentication = mock(Authentication.class);
+    private SecurityContext securityContext = mock(SecurityContext.class);
 
     @BeforeEach
     void setUp() {
@@ -132,6 +138,10 @@ class RecommendationServiceImplTest {
         lenient().when(mockRecommendationEngine.calculateJobScore(eq(job1.userId()), any(), any(), any(), any(), any(), any(), eq(job1), any())).thenReturn(score1);
         lenient().when(mockRecommendationEngine.calculateJobScore(eq(job2.userId()), any(), any(), any(), any(), any(), any(), eq(job2), any())).thenReturn(score2);
         lenient().when(mockRecommendationEngine.calculateJobScore(eq(job3.userId()), any(), any(), any(), any(), any(), any(), eq(job3), any())).thenReturn(score3);
+
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.getPrincipal()).thenReturn("1");
+        SecurityContextHolder.setContext(securityContext);
     }
 
     @Nested
@@ -141,7 +151,7 @@ class RecommendationServiceImplTest {
         @DisplayName("Should return sorted and limited recommendations when all services succeed")
         void shouldReturnSortedLimitedRecommendations() {
             // Act
-            Flux<JobScoreResponse> recommendations = recommendationService.getJobRecommendations(TEST_USER_ID, 2);
+            Flux<JobScoreResponse> recommendations = recommendationService.getJobRecommendations(2);
 
             // Assert
             StepVerifier.create(recommendations)
@@ -164,7 +174,7 @@ class RecommendationServiceImplTest {
             when(mockRecommendationEngine.calculateJobScore(eq(job2.userId()), any(), any(), any(), any(), any(), any(), eq(job2), any())).thenReturn(score2);
 
             // Act
-            Flux<JobScoreResponse> recommendations = recommendationService.getJobRecommendations(TEST_USER_ID, 5);
+            Flux<JobScoreResponse> recommendations = recommendationService.getJobRecommendations(5);
 
             // Assert
             StepVerifier.create(recommendations)
@@ -180,7 +190,7 @@ class RecommendationServiceImplTest {
             when(mockJobServiceClient.getAllJobs()).thenReturn(Flux.empty());
 
             // Act
-            Flux<JobScoreResponse> recommendations = recommendationService.getJobRecommendations(TEST_USER_ID, 5);
+            Flux<JobScoreResponse> recommendations = recommendationService.getJobRecommendations(5);
 
             // Assert
             StepVerifier.create(recommendations)
@@ -196,7 +206,7 @@ class RecommendationServiceImplTest {
             when(mockUserServiceClient.getBlockedUserIds(TEST_USER_ID)).thenReturn(Mono.just(List.of(blockedWorkerJob.userId())));
 
             // Act
-            Flux<JobScoreResponse> recommendations = recommendationService.getJobRecommendations(TEST_USER_ID, 5);
+            Flux<JobScoreResponse> recommendations = recommendationService.getJobRecommendations(5);
 
             // Assert
             StepVerifier.create(recommendations)
@@ -215,7 +225,7 @@ class RecommendationServiceImplTest {
         @DisplayName("Should filter out inactive jobs")
         void shouldFilterInactiveJobs() {
             // Act: Default setup includes job1, job2, job3 (active) and inactiveJob
-            Flux<JobScoreResponse> recommendations = recommendationService.getJobRecommendations(TEST_USER_ID, 5);
+            Flux<JobScoreResponse> recommendations = recommendationService.getJobRecommendations(5);
 
             // Assert
             StepVerifier.create(recommendations)
@@ -231,7 +241,7 @@ class RecommendationServiceImplTest {
         @DisplayName("Should filter out jobs from blocked workers")
         void shouldFilterBlockedWorkerJobs() {
             // Act
-            Flux<JobScoreResponse> recommendations = recommendationService.getJobRecommendations(TEST_USER_ID, 5);
+            Flux<JobScoreResponse> recommendations = recommendationService.getJobRecommendations(5);
 
             // Assert
             StepVerifier.create(recommendations)
@@ -255,7 +265,7 @@ class RecommendationServiceImplTest {
             when(mockJobServiceClient.getAllJobs()).thenReturn(Flux.error(new ServiceUnavailableException("Jobs service down")));
 
             // Act
-            Flux<JobScoreResponse> recommendations = recommendationService.getJobRecommendations(TEST_USER_ID, DEFAULT_LIMIT);
+            Flux<JobScoreResponse> recommendations = recommendationService.getJobRecommendations(DEFAULT_LIMIT);
 
             // Assert
             StepVerifier.create(recommendations)
@@ -273,7 +283,7 @@ class RecommendationServiceImplTest {
             lenient().when(mockGeoLocationServiceClient.getCoordinates(any())).thenReturn(Mono.error(new ServiceUnavailableException("User service down")));
 
             // Act
-            Flux<JobScoreResponse> recommendations = recommendationService.getJobRecommendations(TEST_USER_ID, DEFAULT_LIMIT);
+            Flux<JobScoreResponse> recommendations = recommendationService.getJobRecommendations(DEFAULT_LIMIT);
 
             // Assert: The error from getUserDetails or getCoordinates propagates through flatMap
             StepVerifier.create(recommendations)
@@ -299,7 +309,7 @@ class RecommendationServiceImplTest {
                     .thenReturn(score1, score2, score3); // Return scores normally
 
             // Act
-            Flux<JobScoreResponse> recommendations = recommendationService.getJobRecommendations(TEST_USER_ID, DEFAULT_LIMIT);
+            Flux<JobScoreResponse> recommendations = recommendationService.getJobRecommendations(DEFAULT_LIMIT);
 
             // Assert: Should still complete and return results based on default prefs
             StepVerifier.create(recommendations)
@@ -323,7 +333,7 @@ class RecommendationServiceImplTest {
                     .thenReturn(score1); // Still return score1 for simplicity, actual score might differ
 
             // Act
-            Flux<JobScoreResponse> recommendations = recommendationService.getJobRecommendations(TEST_USER_ID, DEFAULT_LIMIT);
+            Flux<JobScoreResponse> recommendations = recommendationService.getJobRecommendations(DEFAULT_LIMIT);
 
             // Assert: Stream should complete successfully
             StepVerifier.create(recommendations)
@@ -353,7 +363,7 @@ class RecommendationServiceImplTest {
                     .thenReturn(score1);
 
             // Act
-            Flux<JobScoreResponse> recommendations = recommendationService.getJobRecommendations(TEST_USER_ID, DEFAULT_LIMIT);
+            Flux<JobScoreResponse> recommendations = recommendationService.getJobRecommendations(DEFAULT_LIMIT);
 
             // Assert: Stream should complete successfully
             StepVerifier.create(recommendations)
@@ -378,7 +388,7 @@ class RecommendationServiceImplTest {
                     .thenReturn(score1, score2, score3); // Return scores even with null coords
 
             // Act
-            Flux<JobScoreResponse> recommendations = recommendationService.getJobRecommendations(TEST_USER_ID, DEFAULT_LIMIT);
+            Flux<JobScoreResponse> recommendations = recommendationService.getJobRecommendations(DEFAULT_LIMIT);
 
             // Assert
             StepVerifier.create(recommendations)
@@ -403,7 +413,7 @@ class RecommendationServiceImplTest {
             when(mockReviewServiceClient.getUserRating(job1.userId())).thenReturn(Mono.just(invalidWorkerReview));
 
             // Act
-            Flux<JobScoreResponse> recommendations = recommendationService.getJobRecommendations(TEST_USER_ID, DEFAULT_LIMIT);
+            Flux<JobScoreResponse> recommendations = recommendationService.getJobRecommendations(DEFAULT_LIMIT);
 
             // Assert
             StepVerifier.create(recommendations)
@@ -421,7 +431,7 @@ class RecommendationServiceImplTest {
             when(mockReviewServiceClient.getJobRating(job1.id())).thenReturn(Mono.just(invalidJobReview));
 
             // Act
-            Flux<JobScoreResponse> recommendations = recommendationService.getJobRecommendations(TEST_USER_ID, DEFAULT_LIMIT);
+            Flux<JobScoreResponse> recommendations = recommendationService.getJobRecommendations(DEFAULT_LIMIT);
 
             // Assert
             StepVerifier.create(recommendations)
@@ -438,7 +448,7 @@ class RecommendationServiceImplTest {
             when(mockReportServiceClient.getUserReportStats(job1.userId())).thenReturn(Mono.just(invalidWorkerReport));
 
             // Act
-            Flux<JobScoreResponse> recommendations = recommendationService.getJobRecommendations(TEST_USER_ID, DEFAULT_LIMIT);
+            Flux<JobScoreResponse> recommendations = recommendationService.getJobRecommendations(DEFAULT_LIMIT);
 
             // Assert
             StepVerifier.create(recommendations)
@@ -455,7 +465,7 @@ class RecommendationServiceImplTest {
             when(mockReportServiceClient.getJobReportStats(job1.id())).thenReturn(Mono.just(invalidJobReport));
 
             // Act
-            Flux<JobScoreResponse> recommendations = recommendationService.getJobRecommendations(TEST_USER_ID, DEFAULT_LIMIT);
+            Flux<JobScoreResponse> recommendations = recommendationService.getJobRecommendations(DEFAULT_LIMIT);
 
             // Assert
             StepVerifier.create(recommendations)
