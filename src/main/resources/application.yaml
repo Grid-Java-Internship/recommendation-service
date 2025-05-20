@@ -42,6 +42,9 @@ security:
     report-service:
       api-key: "${REPORT_API_KEY}"
       enabled: true
+    reservation-service:
+      api-key: "${RESERVATION_API_KEY}"
+      enabled: true
   paths:
     permitted-requests-for-all-users:
       - method: GET
@@ -82,6 +85,9 @@ web:
       base-url: "/v1/review"
       api-user-rating: "/rating/USER"
       api-job-rating: "/rating/JOB"
+    reservation-service:
+      base-url: "/v1/reservations"
+      api-job-reservation-count: "/count"
     report-service:
       base-url: "/v1/report"
       api-user-report-info: "/info/USER"
@@ -106,6 +112,7 @@ recommendation:
     job-reports-low: -2.0           # Penalty per low severity report against job
     job-reports-medium: -5.0        # Penalty per medium severity report against job
     job-reports-high: -7.5          # Penalty per high severity report against job
+    job-reservations-count: 0.25    # Multiplier for number of reservations
   defaults:
     limit: 15                       # Default number of recommendations
     max-distance: 100.0             # Default maximum distance if preference not set

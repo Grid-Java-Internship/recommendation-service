@@ -29,7 +29,8 @@ public class RecommendationEngine {
             ReportStatsDTO workerReportStats,
             ReportStatsDTO jobReportStats,
             JobDTO jobDetails,
-            List<Long> favoriteWorkerIds
+            List<Long> favoriteWorkerIds,
+            Long jobReservationCount
     ) {
         LogUtil.info("Calculating recommendation score for worker [{}] and job [{}]", workerId, jobDetails.id());
 
@@ -40,6 +41,7 @@ public class RecommendationEngine {
         totalScore += calculateWorkerRatingScore(workerReviewStats, workerId);
         totalScore += calculateJobRatingScore(jobReviewStats, workerId);
         totalScore += calculateCategoryMatchScore(userPreferences, jobDetails);
+        totalScore += calculateFinishedReservationsScore(jobReservationCount, workerId);
 
         if (totalScore > 0) {
             totalScore += calculateHourlyRatePenaltyScore(jobDetails, workerId);
@@ -55,6 +57,11 @@ public class RecommendationEngine {
                 .workerId(workerId)
                 .score(totalScore)
                 .build();
+    }
+
+    private double calculateFinishedReservationsScore(Long jobReservationCount, Long workerId) {
+        LogUtil.info("Job reservations count: {} for worker {}.", jobReservationCount, workerId);
+        return jobReservationCount * weights.getJobReservationsCount();
     }
 
     private double calculateDistanceScore(GeoCoordinatesDTO userCoordinates, UserPreferencesDTO userPreferences, JobDTO jobDetails) {
