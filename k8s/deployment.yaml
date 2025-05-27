@@ -58,6 +58,11 @@ spec:
                 secretKeyRef:
                   name: api-key-secret
                   key: REPORT_API_KEY
+            - name: RESERVATION_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: api-key-secret
+                  key: RESERVATION_API_KEY
             - name: EUREKA_SERVICE_URL
               value: http://eureka-naming-server-service:8761/eureka
           ports:
