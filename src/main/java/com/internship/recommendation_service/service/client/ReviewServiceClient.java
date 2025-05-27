@@ -1,7 +1,7 @@
 package com.internship.recommendation_service.service.client;
 
 import com.internship.recommendation_service.config.property.service.ReviewServiceConfig;
-import com.internship.recommendation_service.config.property.service.ServiceUrlsConfig;
+import com.internship.recommendation_service.config.property.service.ServiceNamesConfig;
 import com.internship.recommendation_service.dto.external.ReviewStatsDTO;
 import com.internship.recommendation_service.util.LogUtil;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +13,7 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class ReviewServiceClient {
     private final ServiceClient serviceClient;
-    private final ServiceUrlsConfig serviceUrlsConfig;
+    private final ServiceNamesConfig serviceNamesConfig;
     private final ReviewServiceConfig reviewServiceConfig;
 
     @Value("${security.feign.review-service.api-key}")
@@ -26,7 +26,7 @@ public class ReviewServiceClient {
      * @return a Mono that emits a ReviewStatsDTO representing the rating of the user with the given ID
      */
     public Mono<ReviewStatsDTO> getUserRating(Long userId) {
-        String url = serviceUrlsConfig.getReviewService() +
+        String url = serviceNamesConfig.getReviewService() +
                      reviewServiceConfig.getBaseUrl() +
                      reviewServiceConfig.getApiUserRating() +
                      "/" + userId;
@@ -47,7 +47,7 @@ public class ReviewServiceClient {
      * @return a Mono that emits a ReviewStatsDTO representing the rating of the job with the given ID
      */
     public Mono<ReviewStatsDTO> getJobRating(Long jobId) {
-        String url = serviceUrlsConfig.getReviewService() +
+        String url = serviceNamesConfig.getReviewService() +
                      reviewServiceConfig.getBaseUrl() +
                      reviewServiceConfig.getApiJobRating() +
                      "/" + jobId;

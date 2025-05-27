@@ -1,7 +1,7 @@
 package com.internship.recommendation_service.service.client;
 
 import com.internship.recommendation_service.config.property.service.ReservationServiceConfig;
-import com.internship.recommendation_service.config.property.service.ServiceUrlsConfig;
+import com.internship.recommendation_service.config.property.service.ServiceNamesConfig;
 import com.internship.recommendation_service.util.LogUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,14 +16,14 @@ public class ReservationServiceClient {
     private String reservationApiKey;
 
     private final ServiceClient serviceClient;
-    private final ServiceUrlsConfig serviceUrlsConfig;
+    private final ServiceNamesConfig serviceNamesConfig;
     private final ReservationServiceConfig reservationServiceConfig;
 
     public Mono<Long> getJobCount(Long jobId) {
-        String url = serviceUrlsConfig.getReservationService() +
-                reservationServiceConfig.getBaseUrl() +
-                reservationServiceConfig.getApiJobReservationCount() +
-                "/" + jobId + "/FINISHED";
+        String url = serviceNamesConfig.getReservationService() +
+                     reservationServiceConfig.getBaseUrl() +
+                     reservationServiceConfig.getApiJobReservationCount() +
+                     "/" + jobId + "/FINISHED";
 
         return serviceClient
                 .getMonoObject(url, Long.class, reservationApiKey)

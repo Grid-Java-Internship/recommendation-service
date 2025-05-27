@@ -1,7 +1,7 @@
 package com.internship.recommendation_service.service.client;
 
 import com.internship.recommendation_service.config.property.RecommendationDefaultsConfig;
-import com.internship.recommendation_service.config.property.service.ServiceUrlsConfig;
+import com.internship.recommendation_service.config.property.service.ServiceNamesConfig;
 import com.internship.recommendation_service.config.property.service.UserServiceConfig;
 import com.internship.recommendation_service.dto.external.UserDTO;
 import com.internship.recommendation_service.dto.external.UserPreferencesDTO;
@@ -19,7 +19,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserServiceClient {
     private final ServiceClient serviceClient;
-    private final ServiceUrlsConfig serviceUrlsConfig;
+    private final ServiceNamesConfig serviceNamesConfig;
     private final UserServiceConfig userServiceConfig;
     private final RecommendationDefaultsConfig defaults;
 
@@ -33,7 +33,7 @@ public class UserServiceClient {
      * @return a Mono that emits a UserDTO containing the user's details
      */
     public Mono<UserDTO> getUserDetails(Long userId) {
-        String url = serviceUrlsConfig.getUserService() +
+        String url = serviceNamesConfig.getUserService() +
                      userServiceConfig.getBaseUrlUsers() +
                      "/" + userId;
 
@@ -49,7 +49,7 @@ public class UserServiceClient {
      * @return a Mono that emits a UserPreferencesDTO containing the user's preferences
      */
     public Mono<UserPreferencesDTO> getUserPreferences(Long userId) {
-        String url = serviceUrlsConfig.getUserService() +
+        String url = serviceNamesConfig.getUserService() +
                      userServiceConfig.getBaseUrlPreferences() +
                      "/" + userId;
 
@@ -69,7 +69,7 @@ public class UserServiceClient {
      * @return a Mono that emits a list of user IDs
      */
     public Mono<List<Long>> getFavoriteUserIds(Long userId) {
-        String url = serviceUrlsConfig.getUserService() +
+        String url = serviceNamesConfig.getUserService() +
                      userServiceConfig.getBaseUrlFavorites() +
                      "?userId=" + userId;
 
@@ -84,7 +84,7 @@ public class UserServiceClient {
      * @return a Mono that emits a list of user IDs
      */
     public Mono<List<Long>> getBlockedUserIds(Long userId) {
-        String url = serviceUrlsConfig.getUserService() +
+        String url = serviceNamesConfig.getUserService() +
                      userServiceConfig.getBaseUrlBlocks() +
                      "/" + userId;
 

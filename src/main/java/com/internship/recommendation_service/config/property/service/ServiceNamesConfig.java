@@ -8,8 +8,8 @@ import org.springframework.context.annotation.Configuration;
 @Getter
 @Setter
 @Configuration
-@ConfigurationProperties(prefix = "service.urls")
-public class ServiceUrlsConfig {
+@ConfigurationProperties(prefix = "service.names")
+public class ServiceNamesConfig {
     private String authService;
     private String userService;
     private String jobService;

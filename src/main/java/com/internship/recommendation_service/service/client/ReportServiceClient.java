@@ -1,7 +1,7 @@
 package com.internship.recommendation_service.service.client;
 
 import com.internship.recommendation_service.config.property.service.ReportServiceConfig;
-import com.internship.recommendation_service.config.property.service.ServiceUrlsConfig;
+import com.internship.recommendation_service.config.property.service.ServiceNamesConfig;
 import com.internship.recommendation_service.dto.external.ReportStatsDTO;
 import com.internship.recommendation_service.util.LogUtil;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +13,7 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class ReportServiceClient {
     private final ServiceClient serviceClient;
-    private final ServiceUrlsConfig serviceUrlsConfig;
+    private final ServiceNamesConfig serviceNamesConfig;
     private final ReportServiceConfig reportServiceConfig;
 
     @Value("${security.feign.report-service.api-key}")
@@ -26,7 +26,7 @@ public class ReportServiceClient {
      * @return a Mono that emits a ReportStatsDTO containing the report data for the specified user
      */
     public Mono<ReportStatsDTO> getUserReportStats(Long userId) {
-        String url = serviceUrlsConfig.getReportService() +
+        String url = serviceNamesConfig.getReportService() +
                      reportServiceConfig.getBaseUrl() +
                      reportServiceConfig.getApiUserReportInfo() +
                      "/" + userId;
@@ -46,7 +46,7 @@ public class ReportServiceClient {
      * @return a Mono that emits a ReportStatsDTO containing the report data for the specified job
      */
     public Mono<ReportStatsDTO> getJobReportStats(Long jobId) {
-        String url = serviceUrlsConfig.getReportService() +
+        String url = serviceNamesConfig.getReportService() +
                      reportServiceConfig.getBaseUrl() +
                      reportServiceConfig.getApiJobReportInfo() +
                      "/" + jobId;

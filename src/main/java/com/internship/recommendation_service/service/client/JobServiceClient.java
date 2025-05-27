@@ -1,7 +1,7 @@
 package com.internship.recommendation_service.service.client;
 
 import com.internship.recommendation_service.config.property.service.JobServiceConfig;
-import com.internship.recommendation_service.config.property.service.ServiceUrlsConfig;
+import com.internship.recommendation_service.config.property.service.ServiceNamesConfig;
 import com.internship.recommendation_service.dto.external.JobDTO;
 import com.internship.recommendation_service.util.LogUtil;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +14,7 @@ import reactor.core.publisher.Flux;
 @RequiredArgsConstructor
 public class JobServiceClient {
     private final ServiceClient serviceClient;
-    private final ServiceUrlsConfig serviceUrlsConfig;
+    private final ServiceNamesConfig serviceNamesConfig;
     private final JobServiceConfig jobServiceConfig;
 
     @Value("${security.feign.job-service.api-key}")
@@ -28,7 +28,7 @@ public class JobServiceClient {
      * in the job service
      */
     public Flux<JobDTO> getAllJobs() {
-        String baseUrl = serviceUrlsConfig.getJobService() + jobServiceConfig.getBaseUrl();
+        String baseUrl = serviceNamesConfig.getJobService() + jobServiceConfig.getBaseUrl();
         String url = buildUrlToFetchAllJobs(baseUrl);
 
         LogUtil.info("Getting all jobs");

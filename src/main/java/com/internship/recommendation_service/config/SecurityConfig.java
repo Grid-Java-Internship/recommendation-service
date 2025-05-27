@@ -14,18 +14,15 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
-
     private final SecurityConfiguration securityConfiguration;
     private final PathPermissionConstants pathPermissionConstants;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(
-            HttpSecurity httpSecurity
-
-    ) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         HttpSecurity http = httpSecurity
                 .authorizeHttpRequests(authorize -> authorize
                         .dispatcherTypeMatchers(DispatcherType.ASYNC).permitAll());
+
         return securityConfiguration.securityFilterChain(http,
                 pathPermissionConstants.getPermittedRequestsForAllUsers(),
                 pathPermissionConstants.getPermittedRequestForSuperAdmin(),
