@@ -20,14 +20,24 @@ configurations {
     }
 }
 
+bootJar {
+    enabled = true
+    archiveFileName = 'app.jar'
+    archiveClassifier = ''
+}
+
+jar {
+    enabled = false
+}
+
 repositories {
     mavenCentral()
     maven {
         name = "GitHubPackages"
         url = uri("https://maven.pkg.github.com/Grid-Java-Internship/maven-libraries")
         credentials {
-            username = project.findProperty('githubUsername')
-            password = project.findProperty('githubToken')
+            username = System.getenv("GITHUB_USER")
+            password = System.getenv("GITHUB_TOKEN")
         }
     }
 }

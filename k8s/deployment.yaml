@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: recommendation-service-deployment
+  namespace: hah
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: recommendation-service
+  template:
+    metadata:
+      labels:
+        app: recommendation-service
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - name: recommendation-service-container
+          image: europe-west3-docker.pkg.dev/gd-gcp-internship-dc/hah-registry/recommendation-service:initial
+          env:
+            - name: REDIS_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: redis-secret
+                  key: REDIS_HOST
+            - name: REDIS_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: redis-secret
+                  key: REDIS_PORT
+            - name: BASE_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: api-key-secret
+                  key: RECOMMENDATION_API_KEY
+            - name: AUTH_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: api-key-secret
+                  key: AUTH_API_KEY
+            - name: JOB_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: api-key-secret
+                  key: JOB_API_KEY
+            - name: REVIEW_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: api-key-secret
+                  key: REVIEW_API_KEY
+            - name: USER_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: api-key-secret
+                  key: USER_API_KEY
+            - name: REPORT_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: api-key-secret
+                  key: REPORT_API_KEY
+            - name: EUREKA_SERVICE_URL
+              value: http://eureka-naming-server-service:8761/eureka
+          ports:
+            - containerPort: 8088
+          imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "256Mi"
+              ephemeral-storage: "256Mi"
+            limits:
+              memory: "1Gi"
