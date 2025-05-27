@@ -45,6 +45,9 @@ security:
     reservation-service:
       api-key: "${RESERVATION_API_KEY}"
       enabled: true
+    auth-service:
+      api-key: "${AUTH_API_KEY}"
+      enabled: true
   paths:
     permitted-requests-for-all-users:
       - method: GET
