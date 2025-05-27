@@ -23,4 +23,5 @@ public class RecommendationWeightsConfig {
     private double jobReportsLow;
     private double jobReportsMedium;
     private double jobReportsHigh;
+    private double jobReservationsCount;
 }

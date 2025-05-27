@@ -9,6 +9,7 @@ import com.internship.recommendation_service.util.LogUtil;
 import com.internship.recommendation_service.util.RecommendationEngine;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
@@ -21,12 +22,14 @@ import java.util.List;
 
 @Service
 @Validated
+@Slf4j
 @RequiredArgsConstructor
 public class RecommendationServiceImpl implements RecommendationService {
     private final JobServiceClient jobServiceClient;
     private final UserServiceClient userServiceClient;
     private final ReviewServiceClient reviewServiceClient;
     private final ReportServiceClient reportServiceClient;
+    private final ReservationServiceClient reservationServiceClient;
 
     private final GeolocationServiceClient geoLocationServiceClient;
     private final RecommendationEngine recommendationEngine;
@@ -143,6 +146,7 @@ public class RecommendationServiceImpl implements RecommendationService {
         Mono<ReportStatsDTO> workerReportStatsMono = reportServiceClient.getUserReportStats(workerId);
         Mono<ReportStatsDTO> jobReportStatsMono = reportServiceClient.getJobReportStats(jobDetails.id());
 
+        Mono<Long> jobReservationCountMono = reservationServiceClient.getJobCount(jobDetails.id());
         // Combine when all data is ready
         return Mono.zip(userCoordinatesMono,
                         userPreferencesMono,
@@ -150,7 +154,8 @@ public class RecommendationServiceImpl implements RecommendationService {
                         jobReviewStatsMono,
                         workerReportStatsMono,
                         jobReportStatsMono,
-                        favoriteWorkerIdsMono)
+                        favoriteWorkerIdsMono,
+                        jobReservationCountMono)
                 .map(tuple -> buildJobScoreResponse(
                         jobDetails,
                         workerId,
@@ -160,7 +165,8 @@ public class RecommendationServiceImpl implements RecommendationService {
                         tuple.getT4(),
                         tuple.getT5(),
                         tuple.getT6(),
-                        tuple.getT7()))
+                        tuple.getT7(),
+                        tuple.getT8()))
                 .subscribeOn(Schedulers.boundedElastic()); // Perform blocking calls or CPU-intensive work off the event loop
     }
 
@@ -189,7 +195,8 @@ public class RecommendationServiceImpl implements RecommendationService {
             ReviewStatsDTO jobReviewStats,
             ReportStatsDTO workerReportStats,
             ReportStatsDTO jobReportStats,
-            List<Long> favoriteWorkerIds) {
+            List<Long> favoriteWorkerIds,
+            Long jobReservationCount) {
         LogUtil.info("Fetched all data. Calculating recommendation score for job {} for worker {}",
                 jobDetails.id(),
                 workerId);
@@ -216,7 +223,8 @@ public class RecommendationServiceImpl implements RecommendationService {
                 workerReportStats,
                 jobReportStats,
                 jobDetails,
-                favoriteWorkerIds);
+                favoriteWorkerIds,
+                jobReservationCount);
     }
 
     /**

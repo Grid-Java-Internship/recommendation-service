@@ -65,11 +65,11 @@ class RecommendationEngineTest {
 
     // Default initial sum (before penalties)
     private final double defaultInitialSum = baseDistanceScore + baseExperienceScore + baseCategoryScore +
-                                             baseFavoriteScore + baseWorkerRatingScore + baseJobRatingScore; // 52.0
+            baseFavoriteScore + baseWorkerRatingScore + baseJobRatingScore; // 52.0
 
     // Default final score (penalties applied)
     private final double defaultFinalScore = defaultInitialSum + baseHourlyRatePenalty +
-                                             baseWorkerReportsPenalty + baseJobReportsPenalty; // 49.0
+            baseWorkerReportsPenalty + baseJobReportsPenalty; // 49.0
 
     @BeforeEach
     void setUp() {
@@ -141,7 +141,8 @@ class RecommendationEngineTest {
                     defaultWorkerReports,
                     defaultJobReports,
                     defaultJobDetails,
-                    defaultFavorites);
+                    defaultFavorites,
+                    0L);
             assertResponse(response, expectedScore);
         }
 
@@ -166,7 +167,7 @@ class RecommendationEngineTest {
                     defaultWorkerReports,
                     defaultJobReports,
                     defaultJobDetails,
-                    defaultFavorites);
+                    defaultFavorites, 0L);
 
             assertResponse(response, expectedScore);
         }
@@ -185,7 +186,7 @@ class RecommendationEngineTest {
                     defaultWorkerReports,
                     defaultJobReports,
                     defaultJobDetails,
-                    defaultFavorites);
+                    defaultFavorites, 0L);
 
             assertResponse(response, expectedScore);
             verify(mockGeoLocationCalculator, never()).calculateDistance(any(), any());
@@ -205,7 +206,7 @@ class RecommendationEngineTest {
                     defaultWorkerReports,
                     defaultJobReports,
                     defaultJobDetails,
-                    defaultFavorites);
+                    defaultFavorites, 0L);
 
             assertResponse(response, expectedScore);
         }
@@ -223,7 +224,7 @@ class RecommendationEngineTest {
                     defaultWorkerReports,
                     defaultJobReports,
                     defaultJobDetails,
-                    defaultFavorites);
+                    defaultFavorites, 0L);
 
             assertResponse(response, expectedScore);
             verify(mockGeoLocationCalculator, never()).calculateDistance(any(), any());
@@ -254,7 +255,7 @@ class RecommendationEngineTest {
                     defaultWorkerReports,
                     defaultJobReports,
                     jobNullLat,
-                    defaultFavorites);
+                    defaultFavorites, 0L);
 
             assertResponse(response, expectedScore);
             verify(mockGeoLocationCalculator, never()).calculateDistance(any(), any());
@@ -284,7 +285,7 @@ class RecommendationEngineTest {
                     defaultWorkerReports,
                     defaultJobReports,
                     jobNullLon,
-                    defaultFavorites);
+                    defaultFavorites, 0L);
 
             assertResponse(response, expectedScore);
             verify(mockGeoLocationCalculator, never()).calculateDistance(any(), any());
@@ -303,7 +304,7 @@ class RecommendationEngineTest {
                     defaultWorkerReports,
                     defaultJobReports,
                     defaultJobDetails,
-                    defaultFavorites);
+                    defaultFavorites, 0L);
 
             assertResponse(response, expectedScore);
 
@@ -323,7 +324,7 @@ class RecommendationEngineTest {
                     defaultWorkerReports,
                     defaultJobReports,
                     defaultJobDetails,
-                    defaultFavorites);
+                    defaultFavorites, 0L);
             assertResponse(response, expectedScore);
             verify(mockGeoLocationCalculator, never()).calculateDistance(any(), any());
         }
@@ -341,7 +342,7 @@ class RecommendationEngineTest {
                     defaultWorkerReports,
                     defaultJobReports,
                     defaultJobDetails,
-                    defaultFavorites);
+                    defaultFavorites, 0L);
             assertResponse(response, expectedScore);
             verify(mockGeoLocationCalculator, never()).calculateDistance(any(), any());
         }
@@ -359,7 +360,7 @@ class RecommendationEngineTest {
                     defaultWorkerReports,
                     defaultJobReports,
                     defaultJobDetails,
-                    defaultFavorites);
+                    defaultFavorites, 0L);
             assertResponse(response, expectedScore);
             verify(mockGeoLocationCalculator, never()).calculateDistance(any(), any());
         }
@@ -377,7 +378,7 @@ class RecommendationEngineTest {
                     defaultWorkerReports,
                     defaultJobReports,
                     defaultJobDetails,
-                    defaultFavorites);
+                    defaultFavorites, 0L);
             assertResponse(response, expectedScore);
             verify(mockGeoLocationCalculator, never()).calculateDistance(any(), any());
         }
@@ -404,7 +405,7 @@ class RecommendationEngineTest {
                     defaultWorkerReports,
                     defaultJobReports,
                     defaultJobDetails,
-                    defaultFavorites);
+                    defaultFavorites, 0L);
 
             assertResponse(response, expectedScore);
         }
@@ -434,7 +435,7 @@ class RecommendationEngineTest {
                     defaultWorkerReports,
                     defaultJobReports,
                     jobNullExp,
-                    defaultFavorites);
+                    defaultFavorites, 0L);
 
             assertResponse(response, expectedScore);
         }
@@ -454,7 +455,7 @@ class RecommendationEngineTest {
                     defaultWorkerReports,
                     defaultJobReports,
                     defaultJobDetails,
-                    defaultFavorites);
+                    defaultFavorites, 0L);
             JobScoreResponse responseNeg = recommendationEngine.calculateJobScore(DEFAULT_WORKER_ID,
                     defaultUserCoords,
                     prefsNegExp,
@@ -463,7 +464,7 @@ class RecommendationEngineTest {
                     defaultWorkerReports,
                     defaultJobReports,
                     defaultJobDetails,
-                    defaultFavorites);
+                    defaultFavorites, 0L);
 
             assertResponse(responseNull, defaultFinalScore);
             assertResponse(responseNeg, defaultFinalScore);
@@ -488,7 +489,7 @@ class RecommendationEngineTest {
                     defaultWorkerReports,
                     defaultJobReports,
                     defaultJobDetails,
-                    favoritesList);
+                    favoritesList, 0L);
             assertResponse(response, expectedScore);
         }
 
@@ -507,7 +508,7 @@ class RecommendationEngineTest {
                     defaultWorkerReports,
                     defaultJobReports,
                     defaultJobDetails,
-                    favoritesList);
+                    favoritesList, 0L);
             assertResponse(response, defaultFinalScore);
         }
 
@@ -522,7 +523,7 @@ class RecommendationEngineTest {
                     defaultWorkerReports,
                     defaultJobReports,
                     defaultJobDetails,
-                    null);
+                    null, 0L);
 
             assertResponse(response, defaultFinalScore);
         }
@@ -543,7 +544,7 @@ class RecommendationEngineTest {
                     defaultWorkerReports,
                     defaultJobReports,
                     defaultJobDetails,
-                    defaultFavorites);
+                    defaultFavorites, 0L);
             assertResponse(response, expectedScore);
         }
 
@@ -560,7 +561,7 @@ class RecommendationEngineTest {
                     defaultWorkerReports,
                     defaultJobReports,
                     defaultJobDetails,
-                    defaultFavorites);
+                    defaultFavorites, 0L);
 
             assertResponse(response, expectedScore);
         }
@@ -581,7 +582,7 @@ class RecommendationEngineTest {
                     defaultWorkerReports,
                     defaultJobReports,
                     defaultJobDetails,
-                    defaultFavorites);
+                    defaultFavorites, 0L);
             assertResponse(response, expectedScore);
         }
 
@@ -598,7 +599,7 @@ class RecommendationEngineTest {
                     defaultWorkerReports,
                     defaultJobReports,
                     defaultJobDetails,
-                    defaultFavorites);
+                    defaultFavorites, 0L);
             assertResponse(response, expectedScore);
         }
     }
@@ -631,7 +632,7 @@ class RecommendationEngineTest {
                     defaultWorkerReports,
                     defaultJobReports,
                     jobGardening,
-                    defaultFavorites);
+                    defaultFavorites, 0L);
 
             assertResponse(response, expectedScore);
         }
@@ -654,7 +655,7 @@ class RecommendationEngineTest {
                     defaultWorkerReports,
                     defaultJobReports,
                     defaultJobDetails,
-                    defaultFavorites);
+                    defaultFavorites, 0L);
 
             assertResponse(response, expectedScore);
         }
@@ -674,7 +675,7 @@ class RecommendationEngineTest {
                     defaultWorkerReports,
                     defaultJobReports,
                     defaultJobDetails,
-                    defaultFavorites);
+                    defaultFavorites, 0L);
             assertResponse(response, defaultFinalScore);
         }
 
@@ -701,7 +702,7 @@ class RecommendationEngineTest {
                     defaultWorkerReports,
                     defaultJobReports,
                     jobNullRate,
-                    defaultFavorites);
+                    defaultFavorites, 0L);
 
             assertResponse(response, defaultInitialSum);
         }
@@ -733,7 +734,7 @@ class RecommendationEngineTest {
                     workerReportsWithIssues,
                     defaultJobReports,
                     defaultJobDetails,
-                    defaultFavorites);
+                    defaultFavorites, 0L);
 
             // Assert
             assertResponse(response, expectedScore);
@@ -750,7 +751,7 @@ class RecommendationEngineTest {
                     null,
                     defaultJobReports,
                     defaultJobDetails,
-                    defaultFavorites);
+                    defaultFavorites, 0L);
 
             assertResponse(response, defaultFinalScore);
         }
@@ -772,7 +773,7 @@ class RecommendationEngineTest {
                     workerReportsWrongType,
                     defaultJobReports,
                     defaultJobDetails,
-                    defaultFavorites);
+                    defaultFavorites, 0L);
 
             assertResponse(response, defaultFinalScore);
         }
@@ -804,7 +805,7 @@ class RecommendationEngineTest {
                     defaultWorkerReports,
                     jobReportsWithIssues,
                     defaultJobDetails,
-                    defaultFavorites);
+                    defaultFavorites, 0L);
 
             // Assert
             assertResponse(response, expectedScore);
@@ -821,7 +822,7 @@ class RecommendationEngineTest {
                     defaultWorkerReports,
                     null,
                     defaultJobDetails,
-                    defaultFavorites);
+                    defaultFavorites, 0L);
 
             assertResponse(response, defaultFinalScore);
         }
@@ -839,7 +840,7 @@ class RecommendationEngineTest {
                     defaultWorkerReports,
                     jobReportsWrongType,
                     defaultJobDetails,
-                    defaultFavorites);
+                    defaultFavorites, 0L);
 
             assertResponse(response, defaultFinalScore);
         }
@@ -859,7 +860,7 @@ class RecommendationEngineTest {
                     defaultWorkerReports,
                     defaultJobReports,
                     defaultJobDetails,
-                    defaultFavorites);
+                    defaultFavorites, 0L);
 
             assertResponse(response, defaultFinalScore);
             verify(mockGeoLocationCalculator).calculateDistance(eq(defaultUserCoords), any(GeoCoordinatesDTO.class));
@@ -888,7 +889,7 @@ class RecommendationEngineTest {
                     workerReportsWithIssues,
                     jobReportsWithIssues,
                     defaultJobDetails,
-                    defaultFavorites);
+                    defaultFavorites, 0L);
 
             // Assert
             assertResponse(response, expectedScore);
@@ -925,7 +926,8 @@ class RecommendationEngineTest {
                     workerReportsWithIssues,
                     jobReportsWithIssues,
                     defaultJobDetails,
-                    defaultFavorites);
+                    defaultFavorites
+                    , 0L);
 
             // Assert
             assertResponse(response, 0.0);
@@ -962,7 +964,7 @@ class RecommendationEngineTest {
                     defaultWorkerReports,
                     defaultJobReports,
                     defaultJobDetails,
-                    defaultFavorites);
+                    defaultFavorites, 0L);
 
             // Assert
             assertThat(response.score()).isEqualTo(expectedScore);

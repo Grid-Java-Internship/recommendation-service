@@ -49,6 +49,9 @@ class RecommendationServiceImplTest {
     @Mock
     private RecommendationEngine mockRecommendationEngine;
 
+    @Mock
+    private ReservationServiceClient mockReservationServiceClient;
+
     @InjectMocks
     private RecommendationServiceImpl recommendationService;
 
@@ -66,6 +69,7 @@ class RecommendationServiceImplTest {
 
     @BeforeEach
     void setUp() {
+
         // Common test data
         UserDTO testUserDTO = new UserDTO(TEST_USER_ID, "123 Main St", "Anytown", "12345", "USA");
         GeoCoordinatesDTO testUserCoords = new GeoCoordinatesDTO(40.0, -70.0);
@@ -135,10 +139,14 @@ class RecommendationServiceImplTest {
         lenient().when(mockReportServiceClient.getJobReportStats(job3.id())).thenReturn(Mono.just(job3Reports));
 
         // Recommendation Engine (Defaults for active jobs)
-        lenient().when(mockRecommendationEngine.calculateJobScore(eq(job1.userId()), any(), any(), any(), any(), any(), any(), eq(job1), any())).thenReturn(score1);
-        lenient().when(mockRecommendationEngine.calculateJobScore(eq(job2.userId()), any(), any(), any(), any(), any(), any(), eq(job2), any())).thenReturn(score2);
-        lenient().when(mockRecommendationEngine.calculateJobScore(eq(job3.userId()), any(), any(), any(), any(), any(), any(), eq(job3), any())).thenReturn(score3);
+        lenient().when(mockRecommendationEngine.calculateJobScore(eq(job1.userId()), any(), any(), any(), any(), any(), any(), eq(job1), any(), any())).thenReturn(score1);
+        lenient().when(mockRecommendationEngine.calculateJobScore(eq(job2.userId()), any(), any(), any(), any(), any(), any(), eq(job2), any(), any())).thenReturn(score2);
+        lenient().when(mockRecommendationEngine.calculateJobScore(eq(job3.userId()), any(), any(), any(), any(), any(), any(), eq(job3), any(), any())).thenReturn(score3);
 
+        // Reservation Service
+        lenient().when(mockReservationServiceClient.getJobCount(anyLong())).thenReturn(Mono.just(0L));
+
+        // Security Context
         when(securityContext.getAuthentication()).thenReturn(authentication);
         when(authentication.getPrincipal()).thenReturn("1");
         SecurityContextHolder.setContext(securityContext);
@@ -160,9 +168,9 @@ class RecommendationServiceImplTest {
                     .verifyComplete();  // Limit is 2
 
             // Verify engine was called for the 3 active, non-blocked jobs
-            verify(mockRecommendationEngine).calculateJobScore(eq(job1.userId()), any(), any(), any(), any(), any(), any(), eq(job1), any());
-            verify(mockRecommendationEngine).calculateJobScore(eq(job2.userId()), any(), any(), any(), any(), any(), any(), eq(job2), any());
-            verify(mockRecommendationEngine).calculateJobScore(eq(job3.userId()), any(), any(), any(), any(), any(), any(), eq(job3), any());
+            verify(mockRecommendationEngine).calculateJobScore(eq(job1.userId()), any(), any(), any(), any(), any(), any(), eq(job1), any(), any());
+            verify(mockRecommendationEngine).calculateJobScore(eq(job2.userId()), any(), any(), any(), any(), any(), any(), eq(job2), any(), any());
+            verify(mockRecommendationEngine).calculateJobScore(eq(job3.userId()), any(), any(), any(), any(), any(), any(), eq(job3), any(), any());
         }
 
         @Test
@@ -170,8 +178,8 @@ class RecommendationServiceImplTest {
         void shouldReturnFewerThanLimitIfFewerJobsQualify() {
             // Arrange: Only job1 and job2 are active and non-blocked
             when(mockJobServiceClient.getAllJobs()).thenReturn(Flux.just(job1, job2, inactiveJob)); // Only 2 active jobs
-            when(mockRecommendationEngine.calculateJobScore(eq(job1.userId()), any(), any(), any(), any(), any(), any(), eq(job1), any())).thenReturn(score1);
-            when(mockRecommendationEngine.calculateJobScore(eq(job2.userId()), any(), any(), any(), any(), any(), any(), eq(job2), any())).thenReturn(score2);
+            when(mockRecommendationEngine.calculateJobScore(eq(job1.userId()), any(), any(), any(), any(), any(), any(), eq(job1), any(), any())).thenReturn(score1);
+            when(mockRecommendationEngine.calculateJobScore(eq(job2.userId()), any(), any(), any(), any(), any(), any(), eq(job2), any(), any())).thenReturn(score2);
 
             // Act
             Flux<JobScoreResponse> recommendations = recommendationService.getJobRecommendations(5);
@@ -214,7 +222,7 @@ class RecommendationServiceImplTest {
                     .verifyComplete();
 
             // Verify engine is never called
-            verify(mockRecommendationEngine, never()).calculateJobScore(anyLong(), any(), any(), any(), any(), any(), any(), any(), any());
+            verify(mockRecommendationEngine, never()).calculateJobScore(anyLong(), any(), any(), any(), any(), any(), any(), any(), any(), any());
         }
     }
 
@@ -234,7 +242,7 @@ class RecommendationServiceImplTest {
 
             // Verify engine not called for inactive job
             verify(mockRecommendationEngine, never())
-                    .calculateJobScore(eq(inactiveJob.userId()), any(), any(), any(), any(), any(), any(), eq(inactiveJob), any());
+                    .calculateJobScore(eq(inactiveJob.userId()), any(), any(), any(), any(), any(), any(), eq(inactiveJob), any(), any());
         }
 
         @Test
@@ -250,7 +258,7 @@ class RecommendationServiceImplTest {
 
             // Verify engine not called for blocked worker job
             verify(mockRecommendationEngine, never())
-                    .calculateJobScore(eq(blockedWorkerJob.userId()), any(), any(), any(), any(), any(), any(), eq(blockedWorkerJob), any());
+                    .calculateJobScore(eq(blockedWorkerJob.userId()), any(), any(), any(), any(), any(), any(), eq(blockedWorkerJob), any(), any());
         }
     }
 
@@ -293,7 +301,7 @@ class RecommendationServiceImplTest {
             verify(mockUserServiceClient).getUserDetails(TEST_USER_ID); // It attempts user details
 
             // Engine should not be called if setup fails
-            verify(mockRecommendationEngine, never()).calculateJobScore(anyLong(), any(), any(), any(), any(), any(), any(), any(), any());
+            verify(mockRecommendationEngine, never()).calculateJobScore(anyLong(), any(), any(), any(), any(), any(), any(), any(), any(), any());
         }
 
         @Test
@@ -305,7 +313,7 @@ class RecommendationServiceImplTest {
                     .thenReturn(Mono.just(defaultPrefsFromClient));
 
             // Mock RecommendationEngine to expect the default prefs provided by the client's onErrorResume
-            when(mockRecommendationEngine.calculateJobScore(anyLong(), any(), any(UserPreferencesDTO.class), any(), any(), any(), any(), any(), any()))
+            when(mockRecommendationEngine.calculateJobScore(anyLong(), any(), any(UserPreferencesDTO.class), any(), any(), any(), any(), any(), any(), any()))
                     .thenReturn(score1, score2, score3); // Return scores normally
 
             // Act
@@ -317,7 +325,7 @@ class RecommendationServiceImplTest {
                     .verifyComplete();
 
             // Verify engine was called with default UserPreferencesDTO
-            verify(mockRecommendationEngine, times(3)).calculateJobScore(anyLong(), any(), isA(UserPreferencesDTO.class), any(), any(), any(), any(), any(), any());
+            verify(mockRecommendationEngine, times(3)).calculateJobScore(anyLong(), any(), isA(UserPreferencesDTO.class), any(), any(), any(), any(), any(), any(), any());
         }
 
         @Test
@@ -329,7 +337,7 @@ class RecommendationServiceImplTest {
                     .thenReturn(Mono.just(defaultWorker1Reviews));
 
             // Mock engine to expect the default review stats for job1
-            when(mockRecommendationEngine.calculateJobScore(eq(job1.userId()), any(), any(), eq(defaultWorker1Reviews), any(), any(), any(), eq(job1), any()))
+            when(mockRecommendationEngine.calculateJobScore(eq(job1.userId()), any(), any(), eq(defaultWorker1Reviews), any(), any(), any(), eq(job1), any(), any()))
                     .thenReturn(score1); // Still return score1 for simplicity, actual score might differ
 
             // Act
@@ -342,11 +350,11 @@ class RecommendationServiceImplTest {
 
             // Verify engine was called for job1 with the default ReviewStatsDTO
             verify(mockRecommendationEngine)
-                    .calculateJobScore(eq(job1.userId()), any(), any(), eq(defaultWorker1Reviews), any(), any(), any(), eq(job1), any());
+                    .calculateJobScore(eq(job1.userId()), any(), any(), eq(defaultWorker1Reviews), any(), any(), any(), eq(job1), any(), any());
             verify(mockRecommendationEngine)
-                    .calculateJobScore(eq(job2.userId()), any(), any(), eq(worker2Reviews), any(), any(), any(), eq(job2), any());
+                    .calculateJobScore(eq(job2.userId()), any(), any(), eq(worker2Reviews), any(), any(), any(), eq(job2), any(), any());
             verify(mockRecommendationEngine)
-                    .calculateJobScore(eq(job3.userId()), any(), any(), eq(worker3Reviews), any(), any(), any(), eq(job3), any());
+                    .calculateJobScore(eq(job3.userId()), any(), any(), eq(worker3Reviews), any(), any(), any(), eq(job3), any(), any());
         }
 
         @Test
@@ -359,7 +367,7 @@ class RecommendationServiceImplTest {
 
             // Mock engine to expect the default report stats for job1
             when(mockRecommendationEngine
-                    .calculateJobScore(eq(job1.userId()), any(), any(), any(), any(), eq(defaultWorker1Reports), any(), eq(job1), any()))
+                    .calculateJobScore(eq(job1.userId()), any(), any(), any(), any(), eq(defaultWorker1Reports), any(), eq(job1), any(), any()))
                     .thenReturn(score1);
 
             // Act
@@ -372,7 +380,7 @@ class RecommendationServiceImplTest {
 
             // Verify engine was called for job1 with the default ReportStatsDTO
             verify(mockRecommendationEngine)
-                    .calculateJobScore(eq(job1.userId()), any(), any(), any(), any(), eq(defaultWorker1Reports), any(), eq(job1), any());
+                    .calculateJobScore(eq(job1.userId()), any(), any(), any(), any(), eq(defaultWorker1Reports), any(), eq(job1), any(), any());
         }
 
         @Test
@@ -384,7 +392,7 @@ class RecommendationServiceImplTest {
 
             // Mock engine to be called with default coordinates
             when(mockRecommendationEngine
-                    .calculateJobScore(anyLong(), eq(GeoCoordinatesDTO.DEFAULT_VALUE), any(), any(), any(), any(), any(), any(), any()))
+                    .calculateJobScore(anyLong(), eq(GeoCoordinatesDTO.DEFAULT_VALUE), any(), any(), any(), any(), any(), any(), any(), any()))
                     .thenReturn(score1, score2, score3); // Return scores even with null coords
 
             // Act
@@ -397,7 +405,7 @@ class RecommendationServiceImplTest {
 
             // Verify engine was called with null GeoCoordinatesDTO
             verify(mockRecommendationEngine, times(3))
-                    .calculateJobScore(anyLong(), eq(GeoCoordinatesDTO.DEFAULT_VALUE), any(), any(), any(), any(), any(), any(), any());
+                    .calculateJobScore(anyLong(), eq(GeoCoordinatesDTO.DEFAULT_VALUE), any(), any(), any(), any(), any(), any(), any(), any());
         }
     }
 
