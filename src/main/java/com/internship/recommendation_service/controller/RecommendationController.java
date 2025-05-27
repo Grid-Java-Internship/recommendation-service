@@ -24,6 +24,7 @@ public class RecommendationController {
     @GetMapping("/jobs")
     public Flux<JobScoreResponse> getJobRecommendations(
             @RequestParam(required = false) Integer limit) {
+        System.out.println("TEST 123 TEST 123");
         int effectiveLimit = (limit != null && limit > 0) ? limit : defaults.getLimit();
         return recommendationService.getJobRecommendations(effectiveLimit);
     }
